@@ -256,6 +256,16 @@ class J2Html
         return self::input('button', $name, $value, $options);
     }
 
+	/**
+	 * Create a button type field
+	 * @param string $name
+	 * @param string $value
+	 * @param array $options
+	 */
+	public static function buttontype($name, $value, $options = array())
+	{
+		return self::input('buttontype', $name, $value, $options);
+	}
 
     /**
      * Creates Media field
@@ -553,6 +563,14 @@ class J2Html
                 $html .= '  />';
                 break;
 
+	        case 'buttontype':
+		        $html .= '<button type="button" name="' . $name . '"  ' . $optionvalue;
+		        if (isset($options['onclick']) && !empty($options['onclick'])) {
+			        $html .= '   onclick ="' . $options['onclick'] . '"';
+		        }
+		        $html .= '>' . $value . '</button>';
+		        break;
+
             case 'submit':
                 $html .= '<input type="submit" name="' . $name . '"  ' . $optionvalue . 'value ="' . $value . '" />';
                 break;
@@ -593,7 +611,6 @@ class J2Html
 
         $platform = J2Store::platform();
         $platform->loadExtra('behavior.multiselect');
-        //$platform->loadExtra('formbehavior.chosen','select');
 
         // echo "<pre>";print_r($options);
         $id = isset($options['id']) && $options['id'] ? $options['id'] : $name;
@@ -945,7 +962,7 @@ class J2Html
 
         $platform = J2Store::platform();
         $platform->loadExtra('behavior.multiselect');
-        //$platform->loadExtra('formbehavior.chosen','select');
+
         $db    = JFactory::getDbo();
         $query = $db->getQuery(true);
         $query->select('a.id AS value, a.title AS text');
@@ -1614,7 +1631,11 @@ jQuery('.modal-backdrop').remove();
 
 		if (!empty($field['key_field']) && !empty($query) && !empty($item->$name)) {
 			// Get the database instance
-			$db = Factory::getContainer()->get('DatabaseDriver');
+			if (version_compare(JVERSION, '3.99.99', 'lt')) {
+				$db = JFactory::getDbo();
+			} else {
+				$db = Factory::getContainer()->get('DatabaseDriver');
+			}
 
 			// Properly escape column and value
 			$query .= ' WHERE ' . $db->quoteName($field['key_field']) . ' = ' . $db->quote($item->$name);
@@ -1622,7 +1643,11 @@ jQuery('.modal-backdrop').remove();
 
 		if (!empty($query)) {
 			try {
-				$db = Factory::getContainer()->get('DatabaseDriver');
+				if (version_compare(JVERSION, '3.99.99', 'lt')) {
+					$db = JFactory::getDbo();
+				} else {
+					$db = Factory::getContainer()->get('DatabaseDriver');
+				}
 				$field_data = $db->setQuery($query)->loadObject();
 				$value_field = $field['value_field'] ?? '';
 				$html = $field_data->$value_field ?? '';
